@@ -1,4 +1,5 @@
 using System;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Game.Domain
@@ -11,6 +12,9 @@ namespace Game.Domain
         public MongoUserRepository(IMongoDatabase database)
         {
             userCollection = database.GetCollection<UserEntity>(CollectionName);
+            userCollection.Indexes.CreateOne(new CreateIndexModel<UserEntity>(
+                Builders<UserEntity>.IndexKeys.Ascending(u => u.Login),
+                new CreateIndexOptions { Unique = true, Background = true}));
         }
 
         public UserEntity Insert(UserEntity user)
@@ -46,7 +50,7 @@ namespace Game.Domain
         public PageList<UserEntity> GetPage(int pageNumber, int pageSize)
         {
             var items = userCollection
-                .Find(null)
+                .Find(FilterDefinition<UserEntity>.Empty)
                 .SortBy(x => x.Login)
                 .Skip(pageSize * (pageNumber - 1))
                 .Limit(pageSize)

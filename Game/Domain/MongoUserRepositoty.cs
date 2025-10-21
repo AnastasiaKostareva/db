@@ -31,8 +31,17 @@ namespace Game.Domain
         public UserEntity GetOrCreateByLogin(string login)
         {
             var user = userCollection.Find(x => x.Login == login).FirstOrDefault();
-            return user ?? Insert(new UserEntity(Guid.NewGuid(), login, null,
-                null, 0, null));
+            try
+            {
+                user ??= Insert(new UserEntity(Guid.NewGuid(), login, null,
+                    null, 0, null));
+            }
+            catch
+            {
+                return user;
+            }
+
+            return user;
         }
 
         public void Update(UserEntity user)
